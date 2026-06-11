@@ -1,12 +1,37 @@
 import { useState, useRef, useEffect } from "react";
 
 // ─── PALETTE ────────────────────────────────────────────
-const C = {
-  bg: "#0c0b09", border: "rgba(255,255,255,0.06)",
-  text: "#e8e0d0", dim: "rgba(232,224,208,0.45)",
-  faint: "rgba(255,255,255,0.18)", gold: "rgba(200,180,150,0.7)",
-  core: "#C8845A", ext: "#7A9E8E", meta: "#8B7BAD",
+const THEMES = {
+  dark: {
+    bg: "#0c0b09", border: "rgba(255,255,255,0.06)",
+    text: "#e8e0d0", dim: "rgba(232,224,208,0.45)",
+    faint: "rgba(255,255,255,0.18)", gold: "rgba(200,180,150,0.7)",
+    surface1: "rgba(255,255,255,0.01)", surface2: "rgba(255,255,255,0.015)",
+    surface3: "rgba(255,255,255,0.02)", surface4: "rgba(255,255,255,0.03)",
+    surface5: "rgba(255,255,255,0.04)", track: "rgba(255,255,255,0.06)",
+    trackStrong: "rgba(255,255,255,0.07)", thumb: "rgba(255,255,255,0.08)",
+    inputBg: "rgba(255,255,255,0.03)", inputBorder: "rgba(200,180,150,0.2)",
+    placeholder: "rgba(200,180,150,0.28)", buttonText: "#0c0b09",
+    navText: "rgba(232,224,208,0.28)", tabText: "rgba(232,224,208,0.3)",
+    textSoft: "rgba(232,224,208,0.6)",
+    core: "#C8845A", ext: "#7A9E8E", meta: "#8B7BAD",
+  },
+  light: {
+    bg: "#f4efe6", border: "rgba(78,55,34,0.12)",
+    text: "#2e241c", dim: "rgba(46,36,28,0.62)",
+    faint: "rgba(78,55,34,0.48)", gold: "rgba(140,100,62,0.86)",
+    surface1: "rgba(255,255,255,0.58)", surface2: "rgba(255,255,255,0.66)",
+    surface3: "rgba(255,255,255,0.76)", surface4: "rgba(255,255,255,0.82)",
+    surface5: "#ffffff", track: "rgba(78,55,34,0.1)",
+    trackStrong: "rgba(78,55,34,0.12)", thumb: "rgba(78,55,34,0.2)",
+    inputBg: "rgba(255,255,255,0.88)", inputBorder: "rgba(140,100,62,0.24)",
+    placeholder: "rgba(140,100,62,0.42)", buttonText: "#fffaf3",
+    navText: "rgba(46,36,28,0.5)", tabText: "rgba(46,36,28,0.48)",
+    textSoft: "rgba(46,36,28,0.72)",
+    core: "#C8845A", ext: "#7A9E8E", meta: "#8B7BAD",
+  },
 };
+let C = THEMES.dark;
 
 // ─── LAYERS DATA ────────────────────────────────────────
 const LAYERS = [
@@ -573,10 +598,29 @@ function VocabView({ initLayer }) {
 export default function App() {
   const [tab, setTab] = useState("analyzer");
   const [vocabInitLayer, setVocabInitLayer] = useState(null);
+  const [theme, setTheme] = useState("dark");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("literary-theme");
+    const preferred = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches
+      ? "light"
+      : "dark";
+    setTheme(saved || preferred);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("literary-theme", theme);
+  }, [theme]);
+
+  C = THEMES[theme] || THEMES.dark;
 
   function goLayer(id) {
     setVocabInitLayer(id);
     setTab("vocab");
+  }
+
+  function toggleTheme() {
+    setTheme(current => current === "light" ? "dark" : "light");
   }
 
   const tabs = [
@@ -587,13 +631,14 @@ export default function App() {
 
   return (
     <div style={{height:"100vh",display:"flex",flexDirection:"column",
-      background:C.bg,color:C.text,fontFamily:"'Noto Serif SC','STSong',Georgia,serif"}}>
+      background:C.bg,color:C.text,fontFamily:"'Noto Serif SC','STSong',Georgia,serif",
+      transition:"background-color 0.25s ease,color 0.25s ease"}}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500&family=EB+Garamond:ital,wght@0,400;1,400&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb { background: ${C.thumb}; border-radius: 2px; }
         textarea { outline: none; }
         button { outline: none; }
         @keyframes fadeUp {
@@ -619,6 +664,12 @@ export default function App() {
             {t.label}
           </button>
         ))}
+        <button onClick={toggleTheme}
+          style={{marginLeft:"auto",height:32,padding:"0 12px",border:`1px solid ${C.inputBorder}`,
+            background:C.surface3,color:C.text,borderRadius:999,fontFamily:"'Noto Serif SC',serif",
+            fontSize:11,letterSpacing:2,cursor:"pointer",transition:"all 0.2s"}}>
+          {theme === "light" ? "切换深色" : "切换浅色"}
+        </button>
       </div>
 
       {/* Content */}
