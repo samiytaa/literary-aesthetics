@@ -191,7 +191,18 @@ function RadarChart({ scores }) {
     const canvas = ref.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    const W = 260, H = 260, cx = W/2, cy = H/2, R = 88;
+    const displaySize = 260;
+    const dpr = window.devicePixelRatio || 1;
+    const bufferSize = Math.round(displaySize * dpr);
+    if (canvas.width !== bufferSize || canvas.height !== bufferSize) {
+      canvas.width = bufferSize;
+      canvas.height = bufferSize;
+    }
+    canvas.style.width = `${displaySize}px`;
+    canvas.style.height = `${displaySize}px`;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+    const W = displaySize, H = displaySize, cx = W/2, cy = H/2, R = 88;
     const n = LAYERS.length;
     ctx.clearRect(0, 0, W, H);
     const pt = (i, val, r) => {
@@ -232,7 +243,7 @@ function RadarChart({ scores }) {
       ctx.fillText(l.name,x,y);
     });
   }, [scores]);
-  return <canvas ref={ref} width={260} height={260} />;
+  return <canvas ref={ref} width={260} height={260} style={{ width: 260, height: 260, display: "block" }} />;
 }
 
 // ─── SPECTRUM BAR ────────────────────────────────────────

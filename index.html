@@ -269,7 +269,7 @@ svg.radar text{font-family:'Noto Serif SC',serif}
   .analyze-btn{font-size:12px;letter-spacing:2px}
 
   .radar-wrap{margin-bottom:16px}
-  #radar-canvas{width:100%;max-width:260px;height:auto}
+  #radar-canvas{display:block;width:100%;max-width:260px;height:auto}
   .aftertaste-block{padding:14px}
   .af-type{font-size:22px;letter-spacing:3px}
   .dim-card{padding:12px 14px}
@@ -425,7 +425,7 @@ svg.radar text{font-family:'Noto Serif SC',serif}
       </div>
       <div id="results-content" style="display:none">
         <div class="radar-wrap">
-          <canvas id="radar-canvas" width="260" height="260"></canvas>
+          <canvas id="radar-canvas" width="260" height="260" style="width:260px;height:260px"></canvas>
         </div>
         <div class="aftertaste-block" id="af-block">
           <div class="af-label">余味类型</div>
@@ -874,7 +874,18 @@ async function callClaude(prompt) {
 function drawRadar(scores) {
   const canvas = document.getElementById('radar-canvas');
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
+  const displaySize = 260;
+  const dpr = window.devicePixelRatio || 1;
+  const bufferSize = Math.round(displaySize * dpr);
+  if (canvas.width !== bufferSize || canvas.height !== bufferSize) {
+    canvas.width = bufferSize;
+    canvas.height = bufferSize;
+  }
+  canvas.style.width = `${displaySize}px`;
+  canvas.style.height = `${displaySize}px`;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
+  const W = displaySize, H = displaySize;
   const cx = W/2, cy = H/2, R = W*0.33;
   const labels = ['温度','密度','透明度','余韵','张力','意象域','时间感','诚实度','文化层'];
   const colors = LAYERS.map(l=>l.color);
